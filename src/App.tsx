@@ -1,9 +1,14 @@
-import React from 'react';
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import Header from './components/Header';
-import Clients from './pages/Clients';
-import Products from './pages/Products';
-import Quotes from './pages/Quotes';
+import React from "react";
+import {
+  BrowserRouter as Router,
+  Route,
+  Routes,
+  Navigate,
+} from "react-router-dom";
+import Header from "./components/Header";
+import Clients from "./pages/Clients";
+import Products from "./pages/Products";
+import Quotes from "./pages/Quotes";
 
 const App: React.FC = () => {
   return (
@@ -11,6 +16,7 @@ const App: React.FC = () => {
       <Header />
       <div className="container mx-auto p-4">
         <Routes>
+          <Route path="/" element={<Navigate to="/quotes" replace />} />
           <Route path="/clients" element={<Clients />} />
           <Route path="/products" element={<Products />} />
           <Route path="/quotes" element={<Quotes />} />

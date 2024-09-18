@@ -12,19 +12,16 @@ interface Customer {
 }
 
 const Clients: React.FC = () => {
-  // Stato per i clienti e per il caricamento
   const [customers, setCustomers] = useState<Customer[]>([]);
-  const [loading, setLoading] = useState(true); // Stato per gestire il caricamento
+  const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
 
-  // Carica la lista dei clienti quando il componente è montato
   useEffect(() => {
     getCustomers()
       .then((response) => setCustomers(response.data))
-      .finally(() => setLoading(false)); // Nasconde lo spinner dopo il caricamento
+      .finally(() => setLoading(false));
   }, []);
 
-  // Funzione per aggiungere un nuovo cliente alla lista
   const addCustomer = (newCustomer: Customer) => {
     setCustomers((prevCustomers) => [...prevCustomers, newCustomer]);
   };

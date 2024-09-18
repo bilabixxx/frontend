@@ -13,7 +13,7 @@ interface Product {
   name: string;
   price: number;
   quantity: number;
-  iva: number; // IVA associata al prodotto
+  iva: number;
 }
 
 interface QuoteFormValues {
@@ -43,7 +43,6 @@ const QuoteForm: React.FC<Props> = ({
   const [customers, setCustomers] = useState<any[]>([]);
   const [products, setProducts] = useState<any[]>([]);
 
-  // Memoize initialValues to prevent unnecessary reinitialization
   const initialValues: QuoteFormValues = useMemo(
     () => ({
       customer: initialData?.customer._id || "",
@@ -85,8 +84,7 @@ const QuoteForm: React.FC<Props> = ({
       .min(0, "Lo sconto non può essere negativo")
       .when("discountType", {
         is: "percent",
-        then: (schema) =>
-          schema.max(100, "Lo sconto non può superare il 100%"),
+        then: (schema) => schema.max(100, "Lo sconto non può superare il 100%"),
         otherwise: (schema) =>
           schema.test({
             name: "max-discount",
@@ -114,7 +112,7 @@ const QuoteForm: React.FC<Props> = ({
   const formik: FormikProps<QuoteFormValues> = useFormik<QuoteFormValues>({
     initialValues,
     validationSchema,
-    enableReinitialize: initialData ? true : false, // Imposta enableReinitialize solo se initialData è definito
+    enableReinitialize: initialData ? true : false,
     onSubmit: async (values) => {
       try {
         if (initialData) {
@@ -232,7 +230,9 @@ const QuoteForm: React.FC<Props> = ({
   };
 
   const handleRemoveProduct = (index: number) => {
-    const updatedProducts = formik.values.products.filter((_, i) => i !== index);
+    const updatedProducts = formik.values.products.filter(
+      (_, i) => i !== index
+    );
     formik.setFieldValue("products", updatedProducts);
   };
 
@@ -277,8 +277,7 @@ const QuoteForm: React.FC<Props> = ({
                 .filter((product) => {
                   // Includi il prodotto corrente o quelli non selezionati in altre righe
                   const isSelectedInOtherRow = formik.values.products.some(
-                    (s, idx) =>
-                      idx !== index && s.product === product._id
+                    (s, idx) => idx !== index && s.product === product._id
                   );
                   return !isSelectedInOtherRow || product._id === sp.product;
                 })

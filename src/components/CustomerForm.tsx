@@ -6,7 +6,7 @@ import { createCustomer } from "../services/api";
 // Definire i Props per il componente CustomerForm
 interface Props {
   onSuccess: () => void;
-  addCustomer: (newCustomer: any) => void;  // Nuova prop per aggiungere un cliente
+  addCustomer: (newCustomer: any) => void;
 }
 
 const CustomerForm: React.FC<Props> = ({ onSuccess, addCustomer }) => {
@@ -68,7 +68,7 @@ const CustomerForm: React.FC<Props> = ({ onSuccess, addCustomer }) => {
           vatNumber: values.vatNumber,
           companyName: values.companyName,
         });
-        
+
         // Aggiungi il nuovo cliente alla lista
         addCustomer(response.data);
         onSuccess();
@@ -90,7 +90,9 @@ const CustomerForm: React.FC<Props> = ({ onSuccess, addCustomer }) => {
             onChange={formik.handleChange}
             value={formik.values.name}
             className={`mt-1 block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 ${
-              formik.errors.name && formik.touched.name ? "border-red-500" : "border-gray-300"
+              formik.errors.name && formik.touched.name
+                ? "border-red-500"
+                : "border-gray-300"
             }`}
           />
           {formik.errors.name && formik.touched.name && (
@@ -106,7 +108,9 @@ const CustomerForm: React.FC<Props> = ({ onSuccess, addCustomer }) => {
             onChange={formik.handleChange}
             value={formik.values.email}
             className={`mt-1 block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 ${
-              formik.errors.email && formik.touched.email ? "border-red-500" : "border-gray-300"
+              formik.errors.email && formik.touched.email
+                ? "border-red-500"
+                : "border-gray-300"
             }`}
           />
           {formik.errors.email && formik.touched.email && (
@@ -125,7 +129,9 @@ const CustomerForm: React.FC<Props> = ({ onSuccess, addCustomer }) => {
             onChange={formik.handleChange}
             value={formik.values.phone}
             className={`mt-1 block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 ${
-              formik.errors.phone && formik.touched.phone ? "border-red-500" : "border-gray-300"
+              formik.errors.phone && formik.touched.phone
+                ? "border-red-500"
+                : "border-gray-300"
             }`}
           />
           {formik.errors.phone && formik.touched.phone && (
@@ -141,7 +147,9 @@ const CustomerForm: React.FC<Props> = ({ onSuccess, addCustomer }) => {
             onChange={formik.handleChange}
             value={formik.values.street}
             className={`mt-1 block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 ${
-              formik.errors.street && formik.touched.street ? "border-red-500" : "border-gray-300"
+              formik.errors.street && formik.touched.street
+                ? "border-red-500"
+                : "border-gray-300"
             }`}
           />
           {formik.errors.street && formik.touched.street && (
@@ -160,7 +168,9 @@ const CustomerForm: React.FC<Props> = ({ onSuccess, addCustomer }) => {
             onChange={formik.handleChange}
             value={formik.values.city}
             className={`mt-1 block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 ${
-              formik.errors.city && formik.touched.city ? "border-red-500" : "border-gray-300"
+              formik.errors.city && formik.touched.city
+                ? "border-red-500"
+                : "border-gray-300"
             }`}
           />
           {formik.errors.city && formik.touched.city && (
@@ -176,7 +186,9 @@ const CustomerForm: React.FC<Props> = ({ onSuccess, addCustomer }) => {
             onChange={formik.handleChange}
             value={formik.values.postalCode}
             className={`mt-1 block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 ${
-              formik.errors.postalCode && formik.touched.postalCode ? "border-red-500" : "border-gray-300"
+              formik.errors.postalCode && formik.touched.postalCode
+                ? "border-red-500"
+                : "border-gray-300"
             }`}
           />
           {formik.errors.postalCode && formik.touched.postalCode && (
@@ -195,7 +207,9 @@ const CustomerForm: React.FC<Props> = ({ onSuccess, addCustomer }) => {
             onChange={formik.handleChange}
             value={formik.values.country}
             className={`mt-1 block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 ${
-              formik.errors.country && formik.touched.country ? "border-red-500" : "border-gray-300"
+              formik.errors.country && formik.touched.country
+                ? "border-red-500"
+                : "border-gray-300"
             }`}
           />
           {formik.errors.country && formik.touched.country && (
@@ -225,7 +239,9 @@ const CustomerForm: React.FC<Props> = ({ onSuccess, addCustomer }) => {
             onChange={formik.handleChange}
             value={formik.values.vatNumber}
             className={`mt-1 block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 ${
-              formik.errors.vatNumber && formik.touched.vatNumber ? "border-red-500" : "border-gray-300"
+              formik.errors.vatNumber && formik.touched.vatNumber
+                ? "border-red-500"
+                : "border-gray-300"
             }`}
           />
           {(formik.errors.taxCode || formik.errors.vatNumber) && (

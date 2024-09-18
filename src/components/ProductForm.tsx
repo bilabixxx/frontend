@@ -24,9 +24,13 @@ const ProductForm: React.FC<Props> = ({ onSuccess, addProduct }) => {
         .required("La descrizione del prodotto è obbligatoria"),
       price: Yup.string()
         .required("Il prezzo è obbligatorio")
-        .test("is-decimal", "Il prezzo deve essere un numero valido", (value) => {
-          return /^\d+([,.]\d{1,2})?$/.test(value || "");
-        }),
+        .test(
+          "is-decimal",
+          "Il prezzo deve essere un numero valido",
+          (value) => {
+            return /^\d+([,.]\d{1,2})?$/.test(value || "");
+          }
+        ),
       iva: Yup.string()
         .required("L'IVA è obbligatoria")
         .test("is-decimal", "L'IVA deve essere un numero valido", (value) => {
@@ -42,14 +46,14 @@ const ProductForm: React.FC<Props> = ({ onSuccess, addProduct }) => {
           iva: values.iva.replace(",", "."),
         };
         const response = await createProduct(formattedValues);
-        addProduct(response.data); // Aggiungi il nuovo prodotto
-        onSuccess(); // Esegui la funzione onSuccess dopo l'aggiunta del prodotto
+        addProduct(response.data);
+        onSuccess();
       } catch (error) {
         console.error("Errore durante la creazione del prodotto", error);
       }
     },
-    validateOnChange: false, // Disabilita la validazione durante il change
-    validateOnBlur: false, // Disabilita la validazione durante il blur
+    validateOnChange: false,
+    validateOnBlur: false,
   });
 
   return (
@@ -91,7 +95,7 @@ const ProductForm: React.FC<Props> = ({ onSuccess, addProduct }) => {
       <div className="mb-4">
         <label className="block text-gray-700">Prezzo</label>
         <input
-          type="text" // Cambiato da "number" a "text" per permettere l'inserimento della virgola
+          type="text"
           name="price"
           onChange={formik.handleChange}
           value={formik.values.price}
@@ -108,7 +112,7 @@ const ProductForm: React.FC<Props> = ({ onSuccess, addProduct }) => {
       <div className="mb-4">
         <label className="block text-gray-700">IVA</label>
         <input
-          type="text" // Cambiato da "number" a "text" per permettere l'inserimento della virgola
+          type="text"
           name="iva"
           onChange={formik.handleChange}
           value={formik.values.iva}
