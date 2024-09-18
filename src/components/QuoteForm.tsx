@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { useFormik, FormikProps, FormikErrors } from "formik";
 import * as Yup from "yup";
 import {
@@ -43,29 +43,27 @@ const QuoteForm: React.FC<Props> = ({
   const [customers, setCustomers] = useState<any[]>([]);
   const [products, setProducts] = useState<any[]>([]);
 
-  // Inizializza initialValues senza dipendere da selectedProducts
-  const initialValues: QuoteFormValues = {
-    customer: initialData?.customer._id || "",
-    products: initialData?.products
-      ? initialData.products.map((product: any) => ({
-          product: product.product._id,
-          name: product.product.name,
-          price: product.product.price,
-          quantity: product.quantity,
-          iva: product.product.iva,
-        }))
-      : [{ product: "", name: "", price: 0, quantity: 1, iva: 0 }],
-    totalPrice: initialData?.totalPrice || 0,
-    vat22: initialData?.vat22 || 0,
-    vat10: initialData?.vat10 || 0,
-    vat4: initialData?.vat4 || 0,
-    discount: initialData?.discount || 0,
-    discountType: initialData?.discountType || "percent",
-  };
-
-  // Inizializza selectedProducts separatamente
-  const [selectedProducts, setSelectedProducts] = useState<Product[]>(
-    initialValues.products
+  // Memoize initialValues to prevent unnecessary reinitialization
+  const initialValues: QuoteFormValues = useMemo(
+    () => ({
+      customer: initialData?.customer._id || "",
+      products: initialData?.products
+        ? initialData.products.map((product: any) => ({
+            product: product.product._id,
+            name: product.product.name,
+            price: product.product.price,
+            quantity: product.quantity,
+            iva: product.product.iva,
+          }))
+        : [{ product: "", name: "", price: 0, quantity: 1, iva: 0 }],
+      totalPrice: initialData?.totalPrice || 0,
+      vat22: initialData?.vat22 || 0,
+      vat10: initialData?.vat10 || 0,
+      vat4: initialData?.vat4 || 0,
+      discount: initialData?.discount || 0,
+      discountType: initialData?.discountType || "percent",
+    }),
+    [initialData]
   );
 
   useEffect(() => {
@@ -150,8 +148,12 @@ const QuoteForm: React.FC<Props> = ({
   });
 
   useEffect(() => {
-    calculateTotals(selectedProducts);
-  }, [selectedProducts, formik.values.discount, formik.values.discountType]);
+    calculateTotals(formik.values.products);
+  }, [
+    formik.values.products,
+    formik.values.discount,
+    formik.values.discountType,
+  ]);
 
   // Funzione per calcolare il totale, la quantità e l'IVA
   const calculateTotals = (updatedProducts: Product[]) => {
@@ -175,14 +177,11 @@ const QuoteForm: React.FC<Props> = ({
     updatedProducts.forEach((sp) => {
       const productTotal = sp.price * sp.quantity;
       if (sp.iva === 22) {
-        vat22Total +=
-          productTotal * 0.22 * (1 - discountValue / totalPrice);
+        vat22Total += productTotal * 0.22 * (1 - discountValue / totalPrice);
       } else if (sp.iva === 10) {
-        vat10Total +=
-          productTotal * 0.1 * (1 - discountValue / totalPrice);
+        vat10Total += productTotal * 0.1 * (1 - discountValue / totalPrice);
       } else if (sp.iva === 4) {
-        vat4Total +=
-          productTotal * 0.04 * (1 - discountValue / totalPrice);
+        vat4Total += productTotal * 0.04 * (1 - discountValue / totalPrice);
       }
     });
 
@@ -195,7 +194,7 @@ const QuoteForm: React.FC<Props> = ({
   };
 
   const handleProductChange = (index: number, productId: string) => {
-    const updatedProducts = [...selectedProducts];
+    const updatedProducts = [...formik.values.products];
     const selectedProduct = products.find((p) => p._id === productId);
 
     if (selectedProduct) {
@@ -207,22 +206,17 @@ const QuoteForm: React.FC<Props> = ({
         iva: selectedProduct.iva,
       };
 
-      formik.setFieldValue(`products[${index}]`, updatedProducts[index]);
+      formik.setFieldValue("products", updatedProducts);
     }
-
-    setSelectedProducts(updatedProducts);
-    calculateTotals(updatedProducts);
   };
 
   const handleQuantityChange = (index: number, quantity: number) => {
-    const updatedProducts = [...selectedProducts];
+    const updatedProducts = [...formik.values.products];
     updatedProducts[index] = {
       ...updatedProducts[index],
       quantity: quantity,
     };
-    setSelectedProducts(updatedProducts);
-    formik.setFieldValue(`products[${index}].quantity`, quantity);
-    calculateTotals(updatedProducts);
+    formik.setFieldValue("products", updatedProducts);
   };
 
   const handleAddProduct = () => {
@@ -233,18 +227,13 @@ const QuoteForm: React.FC<Props> = ({
       quantity: 1,
       iva: 0,
     };
-    setSelectedProducts([...selectedProducts, newProduct]);
-    formik.setFieldValue("products", [...formik.values.products, newProduct]);
+    const updatedProducts = [...formik.values.products, newProduct];
+    formik.setFieldValue("products", updatedProducts);
   };
 
   const handleRemoveProduct = (index: number) => {
-    const updatedProducts = selectedProducts.filter((_, i) => i !== index);
-    setSelectedProducts(updatedProducts);
-    formik.setFieldValue(
-      "products",
-      formik.values.products.filter((_, i) => i !== index)
-    );
-    calculateTotals(updatedProducts);
+    const updatedProducts = formik.values.products.filter((_, i) => i !== index);
+    formik.setFieldValue("products", updatedProducts);
   };
 
   return (
@@ -274,7 +263,7 @@ const QuoteForm: React.FC<Props> = ({
       </div>
 
       {/* Selezione prodotti */}
-      {selectedProducts.map((sp, index) => (
+      {formik.values.products.map((sp, index) => (
         <div key={index} className="flex space-x-4 mb-4">
           <div className="w-1/3">
             <label className="block text-gray-700">Prodotto</label>
@@ -288,8 +277,9 @@ const QuoteForm: React.FC<Props> = ({
                 .filter(
                   (product) =>
                     product._id === sp.product ||
-                    !selectedProducts.some(
-                      (s, idx) => idx !== index && s.product === product._id
+                    !formik.values.products.some(
+                      (s, idx) =>
+                        idx !== index && s.product === product._id
                     )
                 )
                 .map((product: any) => (
@@ -358,7 +348,7 @@ const QuoteForm: React.FC<Props> = ({
               )}
           </div>
 
-          {selectedProducts.length > 1 && (
+          {formik.values.products.length > 1 && (
             <button
               type="button"
               onClick={() => handleRemoveProduct(index)}
