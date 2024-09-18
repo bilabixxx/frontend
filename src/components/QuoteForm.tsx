@@ -30,8 +30,8 @@ interface QuoteFormValues {
 interface Props {
   onSuccess: () => void;
   addQuote: (newQuote: any) => void;
-  updateQuoteInList: (updatedQuote: any) => void; // Aggiungi questa prop
-  initialData?: any; // Dati iniziali per la modifica del preventivo
+  updateQuoteInList: (updatedQuote: any) => void;
+  initialData?: any;
 }
 
 const QuoteForm: React.FC<Props> = ({
@@ -42,8 +42,11 @@ const QuoteForm: React.FC<Props> = ({
 }) => {
   const [customers, setCustomers] = useState<any[]>([]);
   const [products, setProducts] = useState<any[]>([]);
-  const [selectedProducts, setSelectedProducts] = useState<Product[]>(
-    initialData?.products
+
+  // Inizializza initialValues senza dipendere da selectedProducts
+  const initialValues: QuoteFormValues = {
+    customer: initialData?.customer._id || "",
+    products: initialData?.products
       ? initialData.products.map((product: any) => ({
           product: product.product._id,
           name: product.product.name,
@@ -51,7 +54,18 @@ const QuoteForm: React.FC<Props> = ({
           quantity: product.quantity,
           iva: product.product.iva,
         }))
-      : [{ product: "", name: "", price: 0, quantity: 1, iva: 0 }]
+      : [{ product: "", name: "", price: 0, quantity: 1, iva: 0 }],
+    totalPrice: initialData?.totalPrice || 0,
+    vat22: initialData?.vat22 || 0,
+    vat10: initialData?.vat10 || 0,
+    vat4: initialData?.vat4 || 0,
+    discount: initialData?.discount || 0,
+    discountType: initialData?.discountType || "percent",
+  };
+
+  // Inizializza selectedProducts separatamente
+  const [selectedProducts, setSelectedProducts] = useState<Product[]>(
+    initialValues.products
   );
 
   useEffect(() => {
@@ -100,25 +114,14 @@ const QuoteForm: React.FC<Props> = ({
   });
 
   const formik: FormikProps<QuoteFormValues> = useFormik<QuoteFormValues>({
-    initialValues: {
-      customer: initialData?.customer._id || "",
-      products: selectedProducts,
-      totalPrice: initialData?.totalPrice || 0,
-      vat22: initialData?.vat22 || 0,
-      vat10: initialData?.vat10 || 0,
-      vat4: initialData?.vat4 || 0,
-      discount: initialData?.discount || 0,
-      discountType: initialData?.discountType || "percent",
-    },
+    initialValues,
     validationSchema,
-    enableReinitialize: true, // Importante per re-inizializzare il form quando initialData cambia
+    enableReinitialize: true,
     onSubmit: async (values) => {
       try {
         if (initialData) {
-          // Aggiorna il preventivo esistente
           await updateQuote(initialData._id, values);
 
-          // Costruisci il preventivo aggiornato combinando initialData e values
           const updatedQuote = {
             ...initialData,
             ...values,
@@ -134,10 +137,10 @@ const QuoteForm: React.FC<Props> = ({
             }),
           };
 
-          updateQuoteInList(updatedQuote); // Aggiorna il preventivo nella lista
+          updateQuoteInList(updatedQuote);
         } else {
           const response = await createQuote(values);
-          addQuote(response.data); // Aggiungi il nuovo preventivo
+          addQuote(response.data);
         }
         onSuccess();
       } catch (error) {
@@ -172,11 +175,14 @@ const QuoteForm: React.FC<Props> = ({
     updatedProducts.forEach((sp) => {
       const productTotal = sp.price * sp.quantity;
       if (sp.iva === 22) {
-        vat22Total += productTotal * 0.22 * (1 - discountValue / totalPrice);
+        vat22Total +=
+          productTotal * 0.22 * (1 - discountValue / totalPrice);
       } else if (sp.iva === 10) {
-        vat10Total += productTotal * 0.1 * (1 - discountValue / totalPrice);
+        vat10Total +=
+          productTotal * 0.1 * (1 - discountValue / totalPrice);
       } else if (sp.iva === 4) {
-        vat4Total += productTotal * 0.04 * (1 - discountValue / totalPrice);
+        vat4Total +=
+          productTotal * 0.04 * (1 - discountValue / totalPrice);
       }
     });
 
@@ -197,7 +203,7 @@ const QuoteForm: React.FC<Props> = ({
         product: selectedProduct._id,
         name: selectedProduct.name,
         price: selectedProduct.price,
-        quantity: updatedProducts[index].quantity, // Mantiene la quantità selezionata
+        quantity: updatedProducts[index].quantity,
         iva: selectedProduct.iva,
       };
 
@@ -241,10 +247,6 @@ const QuoteForm: React.FC<Props> = ({
     calculateTotals(updatedProducts);
   };
 
-  const availableProducts = products.filter(
-    (product) => !selectedProducts.some((sp) => sp.product === product._id)
-  );
-
   return (
     <form onSubmit={formik.handleSubmit}>
       {/* Selezione cliente */}
@@ -256,7 +258,6 @@ const QuoteForm: React.FC<Props> = ({
           value={formik.values.customer}
           className="mt-1 block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
         >
-          {/* Se non c'è un cliente già selezionato, mostra "Seleziona un cliente" */}
           {!formik.values.customer && (
             <option value="">Seleziona un cliente</option>
           )}
@@ -283,10 +284,13 @@ const QuoteForm: React.FC<Props> = ({
               className="mt-1 block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
             >
               <option value="">Seleziona un prodotto</option>
-              {[...products, { _id: sp.product, name: sp.name }] // Aggiunge il prodotto selezionato anche se non è nella lista dei prodotti disponibili
+              {products
                 .filter(
-                  (value, idx, self) =>
-                    self.findIndex((p) => p._id === value._id) === idx
+                  (product) =>
+                    product._id === sp.product ||
+                    !selectedProducts.some(
+                      (s, idx) => idx !== index && s.product === product._id
+                    )
                 )
                 .map((product: any) => (
                   <option key={product._id} value={product._id}>
