@@ -63,7 +63,7 @@ const QuoteForm: React.FC<Props> = ({
       discount: initialData?.discount || 0,
       discountType: initialData?.discountType || "percent",
     }),
-    [initialData]
+    [initialData ? initialData._id : null]
   );
 
   useEffect(() => {
@@ -114,7 +114,7 @@ const QuoteForm: React.FC<Props> = ({
   const formik: FormikProps<QuoteFormValues> = useFormik<QuoteFormValues>({
     initialValues,
     validationSchema,
-    enableReinitialize: true,
+    enableReinitialize: initialData ? true : false, // Imposta enableReinitialize solo se initialData è definito
     onSubmit: async (values) => {
       try {
         if (initialData) {
@@ -274,14 +274,14 @@ const QuoteForm: React.FC<Props> = ({
             >
               <option value="">Seleziona un prodotto</option>
               {products
-                .filter(
-                  (product) =>
-                    product._id === sp.product ||
-                    !formik.values.products.some(
-                      (s, idx) =>
-                        idx !== index && s.product === product._id
-                    )
-                )
+                .filter((product) => {
+                  // Includi il prodotto corrente o quelli non selezionati in altre righe
+                  const isSelectedInOtherRow = formik.values.products.some(
+                    (s, idx) =>
+                      idx !== index && s.product === product._id
+                  );
+                  return !isSelectedInOtherRow || product._id === sp.product;
+                })
                 .map((product: any) => (
                   <option key={product._id} value={product._id}>
                     {product.name}
